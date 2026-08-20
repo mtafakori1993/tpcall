@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">TP Call</string>
+
+    <string name="channel_signaling_name">اتصال سرور</string>
+    <string name="channel_signaling_desc">وضعیت اتصال به سرور TP Call</string>
+    <string name="channel_incoming_name">تماس ورودی</string>
+    <string name="channel_incoming_desc">زنگ تماس‌های ورودی</string>
+    <string name="channel_active_name">تماس فعال</string>
+    <string name="channel_active_desc">اعلان تماس در حال برقراری</string>
+
+    <string name="notif_signaling_text">در حال اتصال…</string>
+    <string name="notif_signaling_connected">متصل</string>
+    <string name="notif_signaling_reconnecting">در حال بازیابی ارتباط…</string>
+    <string name="notif_signaling_disconnected">قطع ارتباط</string>
+    <string name="notif_incoming_title">تماس ورودی</string>
+    <string name="notif_incoming_text">%1$s - %2$s</string>
+    <string name="notif_incoming_caption">داخلی %1$s</string>
+    <string name="notif_action_answer">پاسخ</string>
+    <string name="notif_action_reject">رد تماس</string>
+    <string name="notif_action_hangup">قطع تماس</string>
+    <string name="notif_active_text">%1$s • داخلی %2$s</string>
+</resources>

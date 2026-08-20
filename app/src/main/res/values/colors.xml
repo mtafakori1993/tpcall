@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TP / Tafakor Pardazan brand palette -->
+    <color name="tp_deep_navy">#FF021C25</color>
+    <color name="tp_navy">#FF091E27</color>
+    <color name="tp_dark_teal">#FF0E3338</color>
+    <color name="tp_teal">#FF053A3D</color>
+    <color name="tp_forest_teal">#FF165A54</color>
+    <color name="tp_aurora_light_green">#FF91DA73</color>
+    <color name="tp_aurora_green">#FF69B437</color>
+    <color name="tp_forest_green">#FF23643D</color>
+    <color name="tp_deep_green">#FF022C22</color>
+    <color name="tp_dark_forest">#FF0D2D23</color>
+
+    <!-- Window/splash background for the dark theme -->
+    <color name="tp_background">#FF021C25</color>
+</resources>
