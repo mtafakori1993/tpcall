@@ -41,13 +41,13 @@ TP Call          ● متصل
 The backend (`tpcall-backend`) must be reachable on the company LAN:
 
 ```
-Backend:   http://192.168.1.200:9090
+Backend:   https://tpcallapi.tafakorpardazan.ir
 ```
 
 Server health check:
 
 ```
-http://192.168.1.200:9090/health
+https://tpcallapi.tafakorpardazan.ir/health
 ```
 
 Both the phone and the server must be on reachable network segments.
@@ -257,7 +257,7 @@ the classic `org.webrtc:google-webrtc` binary). Audio-only; no video, no SIP.
 ## WebSocket endpoint
 
 ```
-ws://192.168.1.200:9090/api/v1/ws
+wss://tpcallapi.tafakorpardazan.ir/api/v1/ws
 ```
 
 Authenticated with `Authorization: Bearer <JWT>`.

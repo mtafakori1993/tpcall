@@ -55,6 +55,9 @@ object TpColors {
     val DestructivePressed = Color(0xFFC34246)
     val DestructiveSurface = Color(0xFF3D1C1F)
 
+    // Attention/warning (restrained warm amber, compatible with the aurora palette)
+    val Warning = Color(0xFFE0A458)
+
     // Disabled
     val DisabledSurface = Color(0xFF0A2B2F)
     val DisabledText = Color(0xFF48656B)

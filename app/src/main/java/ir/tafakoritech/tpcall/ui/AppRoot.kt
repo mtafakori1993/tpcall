@@ -14,7 +14,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +32,7 @@ import ir.tafakoritech.tpcall.ui.call.ConnectingScreen
 import ir.tafakoritech.tpcall.ui.call.InCallScreen
 import ir.tafakoritech.tpcall.ui.call.IncomingScreen
 import ir.tafakoritech.tpcall.ui.call.OutgoingScreen
+import ir.tafakoritech.tpcall.ui.readiness.DeviceReadinessScreen
 
 /**
  * Top-level screen dispatcher. Call state (not manual navigation calls) drives
@@ -50,6 +54,20 @@ fun AppRoot(container: AppContainer) {
             sessionState is SessionState.LoggedOut && serviceRunning ->
                 container.serviceCoordinator.stopService()
         }
+    }
+
+    // Controlled setup flow: right after login, if critical readiness items are
+    // missing, surface the readiness assistant once per process. It never blocks
+    // a ringing call, and the user can skip it at any time.
+    var readinessSkipped by rememberSaveable { mutableStateOf(false) }
+    var readinessGate by remember { mutableStateOf(false) }
+    LaunchedEffect(sessionState) {
+        if (sessionState is SessionState.Authenticated && !readinessSkipped) {
+            readinessGate = !container.deviceReadinessManager.currentState().isCriticalReady()
+        }
+    }
+    LaunchedEffect(callState) {
+        if (callState.isActive) readinessGate = false
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -85,16 +103,30 @@ fun AppRoot(container: AppContainer) {
                 SessionState.LoggedOut -> AuthScreen(controller = controller)
 
                 is SessionState.Authenticated -> {
-                    when (val state = callState) {
-                        CallState.Idle -> MainScaffold(
-                            container = container,
-                            onLogout = { controller.logout() },
+                    if (readinessGate && callState == CallState.Idle) {
+                        DeviceReadinessScreen(
+                            manager = container.deviceReadinessManager,
+                            onDone = {
+                                readinessGate = false
+                                readinessSkipped = true
+                            },
+                            onBack = {
+                                readinessGate = false
+                                readinessSkipped = true
+                            },
                         )
+                    } else {
+                        when (val state = callState) {
+                            CallState.Idle -> MainScaffold(
+                                container = container,
+                                onLogout = { controller.logout() },
+                            )
 
-                        is CallState.IncomingRinging -> IncomingScreen(controller, state)
-                        is CallState.OutgoingRinging -> OutgoingScreen(controller, state)
-                        is CallState.Connecting -> ConnectingScreen(controller, state)
-                        is CallState.InCall -> InCallScreen(controller, state)
+                            is CallState.IncomingRinging -> IncomingScreen(controller, state)
+                            is CallState.OutgoingRinging -> OutgoingScreen(controller, state)
+                            is CallState.Connecting -> ConnectingScreen(controller, state)
+                            is CallState.InCall -> InCallScreen(controller, state)
+                        }
                     }
                 }
             }

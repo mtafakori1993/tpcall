@@ -21,8 +21,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "BASE_URL", "\"http://192.168.1.200:9090\"")
-        buildConfigField("String", "WS_URL", "\"ws://192.168.1.200:9090/api/v1/ws\"")
+        buildConfigField("String", "BASE_URL", "\"https://tpcallapi.tafakorpardazan.ir\"")
+        buildConfigField("String", "WS_URL", "\"wss://tpcallapi.tafakorpardazan.ir/api/v1/ws\"")
     }
 
     buildTypes {

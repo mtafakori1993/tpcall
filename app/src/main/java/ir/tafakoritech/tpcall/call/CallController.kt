@@ -108,6 +108,7 @@ class CallController(
     private var signalingRecoveryJob: Job? = null
     private var flashJob: Job? = null
     private var iceServers: List<IceServerDto> = emptyList()
+    private var iceServersFetchedAtMs: Long = 0L
     private var lastCallRequestId: String? = null
 
     val myUser: UserDto?
@@ -370,11 +371,28 @@ class CallController(
                 handleConnectionRecovery(state)
             }
         }
-        scope.launch {
-            runCatching { authApi.webRtcConfig(session.token) }
-                .onSuccess { iceServers = it.iceServers }
-                .onFailure { e -> Log.w(TAG, "webrtc_config_fetch_failed ${e.message}") }
-        }
+        scope.launch { refreshIceServers(session.token) }
+    }
+
+    private suspend fun refreshIceServers(token: String) {
+        runCatching { authApi.webRtcConfig(token) }
+            .onSuccess {
+                iceServers = it.iceServers
+                iceServersFetchedAtMs = System.currentTimeMillis()
+            }
+            .onFailure { e -> Log.w(TAG, "webrtc_config_fetch_failed ${e.message}") }
+    }
+
+    /**
+     * TURN credentials are short-lived (the backend issues them for 24h), so a config fetched
+     * when signaling started can expire in a long-running session. Refetch when it is stale
+     * or was never fetched; on failure the cached servers are kept.
+     */
+    private suspend fun refreshIceServersIfStale() {
+        val age = System.currentTimeMillis() - iceServersFetchedAtMs
+        if (iceServersFetchedAtMs != 0L && age < ICE_CONFIG_MAX_AGE_MS) return
+        val token = sessionStore.load()?.token ?: return
+        refreshIceServers(token)
     }
 
     fun stopSignaling() {
@@ -696,6 +714,7 @@ class CallController(
         _callState.value = CallState.Connecting(callId, state.extension, state.name)
         startNegotiationTimeout(callId)
         scope.launch {
+            refreshIceServersIfStale()
             rtc.beginCall(iceServers)
             rtc.createOffer()
         }
@@ -712,6 +731,7 @@ class CallController(
         Log.i(TAG, "webrtc_offer_received call_id=${msg.callId}")
         startNegotiationTimeout(state.callId)
         scope.launch {
+            refreshIceServersIfStale()
             rtc.beginCall(iceServers)
             rtc.applyRemoteOffer(sdp)
         }
@@ -862,5 +882,7 @@ class CallController(
 
     private companion object {
         const val TAG = "CallController"
+        /** Refetch /webrtc/config before a call when the cached TURN credentials are older than this. */
+        const val ICE_CONFIG_MAX_AGE_MS = 6L * 60 * 60 * 1000
     }
 }

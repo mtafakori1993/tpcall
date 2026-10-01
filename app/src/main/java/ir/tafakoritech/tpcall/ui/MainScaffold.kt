@@ -70,6 +70,7 @@ fun MainScaffold(
                     controller = controller,
                     dialerViewModel = dialerViewModel,
                     onLogout = onLogout,
+                    deviceReadinessManager = container.deviceReadinessManager,
                 )
             }
         }

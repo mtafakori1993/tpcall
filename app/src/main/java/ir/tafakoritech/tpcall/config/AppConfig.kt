@@ -13,7 +13,7 @@ object AppConfig {
 
     val WS_URL: String = BuildConfig.WS_URL
 
-    const val HEALTH_URL: String = "http://192.168.1.200:9090/health"
+    const val HEALTH_URL: String = "https://tpcallapi.tafakorpardazan.ir/health"
 
     const val WS_HEARTBEAT_PING_MS: Long = 25_000L
 

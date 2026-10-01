@@ -65,11 +65,21 @@ class WebRtcManager(
         safe {
             ensureFactory()
             close()
-            Log.i(TAG, "webrtc_begin_call ice_servers=${iceServers.size}")
+            Log.i(
+                TAG,
+                "webrtc_begin_call ice_servers=${iceServers.size} " +
+                    "turn_servers=${iceServers.count { s -> s.urls.any { u -> u.startsWith("turn") } }}",
+            )
 
             val rtcConfig = PeerConnection.RTCConfiguration(
                 iceServers.map {
-                    PeerConnection.IceServer.builder(it.urls).createIceServer()
+                    val builder = PeerConnection.IceServer.builder(it.urls)
+                    // TURN servers require the short-lived credentials from /webrtc/config.
+                    if (!it.username.isNullOrEmpty() && !it.credential.isNullOrEmpty()) {
+                        builder.setUsername(it.username)
+                        builder.setPassword(it.credential)
+                    }
+                    builder.createIceServer()
                 },
             )
             rtcConfig.iceCandidatePoolSize = 0

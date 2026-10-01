@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,9 +36,11 @@ import ir.tafakoritech.tpcall.R
 import ir.tafakoritech.tpcall.call.CallController
 import ir.tafakoritech.tpcall.call.SessionState
 import ir.tafakoritech.tpcall.data.signaling.SignalingConnectionState
+import ir.tafakoritech.tpcall.device.DeviceReadinessManager
 import ir.tafakoritech.tpcall.ui.components.TpDialPad
 import ir.tafakoritech.tpcall.ui.components.TpPrimaryButton
 import ir.tafakoritech.tpcall.ui.components.TpStatusPill
+import ir.tafakoritech.tpcall.ui.readiness.DeviceReadinessScreen
 import ir.tafakoritech.tpcall.ui.rememberMicrophonePermissionRequester
 import ir.tafakoritech.tpcall.ui.requestNotificationPermissionOnce
 import ir.tafakoritech.tpcall.ui.theme.TpColors
@@ -49,7 +52,19 @@ fun HomeScreen(
     controller: CallController,
     dialerViewModel: DialerViewModel,
     onLogout: () -> Unit,
+    deviceReadinessManager: DeviceReadinessManager,
 ) {
+    var showReadiness by rememberSaveable { mutableStateOf(false) }
+
+    if (showReadiness) {
+        DeviceReadinessScreen(
+            manager = deviceReadinessManager,
+            onDone = { showReadiness = false },
+            onBack = { showReadiness = false },
+        )
+        return
+    }
+
     val state by dialerViewModel.uiState.collectAsStateWithLifecycle()
     val session by controller.sessionState.collectAsStateWithLifecycle()
     val connectionState by controller.connectionState.collectAsStateWithLifecycle()
@@ -69,6 +84,7 @@ fun HomeScreen(
         onClear = dialerViewModel::onClearPressed,
         onCallPressed = { micRequester { dialerViewModel.onCallPressed() } },
         onLogout = onLogout,
+        onOpenReadiness = { showReadiness = true },
     )
 }
 
@@ -83,6 +99,7 @@ private fun HomeContent(
     onClear: () -> Unit,
     onCallPressed: () -> Unit,
     onLogout: () -> Unit,
+    onOpenReadiness: () -> Unit,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     val signalingConnected = connectionState == SignalingConnectionState.Connected
@@ -142,6 +159,13 @@ private fun HomeContent(
                         )
                     }
                     DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                        DropdownMenuItem(
+                            text = { Text("وضعیت دسترسی‌ها") },
+                            onClick = {
+                                menuExpanded = false
+                                onOpenReadiness()
+                            },
+                        )
                         DropdownMenuItem(
                             text = { Text("خروج") },
                             onClick = {
@@ -330,6 +354,7 @@ private fun HomeEmptyPreview() {
             onClear = {},
             onCallPressed = {},
             onLogout = {},
+            onOpenReadiness = {},
         )
     }
 }
@@ -356,6 +381,7 @@ private fun HomeWithBottomBarPreview() {
                     onClear = {},
                     onCallPressed = {},
                     onLogout = {},
+                    onOpenReadiness = {},
                 )
             }
             ir.tafakoritech.tpcall.ui.components.TpBottomBar(
@@ -394,6 +420,7 @@ private fun HomeTwoDigitsPreview() {
             onClear = {},
             onCallPressed = {},
             onLogout = {},
+            onOpenReadiness = {},
         )
     }
 }
@@ -418,6 +445,7 @@ private fun HomeResolvedPreview() {
             onClear = {},
             onCallPressed = {},
             onLogout = {},
+            onOpenReadiness = {},
         )
     }
 }

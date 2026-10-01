@@ -44,6 +44,10 @@ data class UserDto(
 @Serializable
 data class IceServerDto(
     val urls: List<String> = emptyList(),
+    /** TURN only: short-lived username issued by the backend (`<expiry>:<extension>`). */
+    val username: String? = null,
+    /** TURN only: credential matching [username]. */
+    val credential: String? = null,
 )
 
 @Serializable

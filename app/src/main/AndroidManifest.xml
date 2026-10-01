@@ -11,6 +11,32 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <!-- Required to launch Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+         from the device-readiness assistant so internal VoIP calls are not
+         killed in the background by aggressive battery management. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <!-- Package visibility for the system/OEM settings activities that the
+         device-readiness assistant navigates to. Without these, resolveActivity
+         returns null on Android 11+ and OEM pages would silently fall back. -->
+    <queries>
+        <intent>
+            <action android:name="android.settings.APPLICATION_DETAILS_SETTINGS" />
+        </intent>
+        <intent>
+            <action android:name="android.settings.APP_NOTIFICATION_SETTINGS" />
+        </intent>
+        <intent>
+            <action android:name="android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+        </intent>
+        <intent>
+            <action android:name="android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS" />
+        </intent>
+        <intent>
+            <action android:name="android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT" />
+        </intent>
+        <package android:name="com.miui.securitycenter" />
+    </queries>
     <!-- Core-Telecom (CallsManager.addCall / registerAppWithTelecom) requires
          MANAGE_OWN_CALLS so TP Call can register its own VoIP calls. It is a
          normal (auto-granted) permission, NOT ROLE_DIALER. -->

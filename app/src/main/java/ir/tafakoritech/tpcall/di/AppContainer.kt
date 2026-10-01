@@ -12,6 +12,13 @@ import ir.tafakoritech.tpcall.data.api.ApiClient
 import ir.tafakoritech.tpcall.data.api.AuthApi
 import ir.tafakoritech.tpcall.data.session.SessionStore
 import ir.tafakoritech.tpcall.data.signaling.SignalingClient
+import ir.tafakoritech.tpcall.device.AndroidBatteryChecker
+import ir.tafakoritech.tpcall.device.AndroidIntentLauncher
+import ir.tafakoritech.tpcall.device.AndroidPermissionsChecker
+import ir.tafakoritech.tpcall.device.AndroidReadinessLogger
+import ir.tafakoritech.tpcall.device.DeviceInfoFactory
+import ir.tafakoritech.tpcall.device.DeviceReadinessManager
+import ir.tafakoritech.tpcall.device.OemSettingsNavigator
 import ir.tafakoritech.tpcall.notification.CallNotificationManager
 import ir.tafakoritech.tpcall.service.CallService
 import ir.tafakoritech.tpcall.telecom.TpTelecomManager
@@ -44,6 +51,18 @@ class AppContainer(private val appContext: Context) {
     val sessionStore = SessionStore(appContext)
     val authApi = AuthApi(okHttpClient)
     val notificationManager = CallNotificationManager(appContext)
+
+    val deviceReadinessManager = DeviceReadinessManager(
+        deviceInfo = DeviceInfoFactory.create(),
+        permissions = AndroidPermissionsChecker(appContext),
+        battery = AndroidBatteryChecker(appContext),
+        navigator = OemSettingsNavigator(
+            launcher = AndroidIntentLauncher(appContext),
+            packageName = appContext.packageName,
+            logger = AndroidReadinessLogger,
+        ),
+        logger = AndroidReadinessLogger,
+    )
     val audioRouteManager = AudioRouteManager(appContext)
     val webRtcManager = WebRtcManager(appContext, scope, Dispatchers.Main.immediate)
     val telecomManager = TpTelecomManager(appContext, scope)
